@@ -12,7 +12,7 @@ class Entry():
         "expires_at",
     )
     
-    def __init__(self, key: str, value: Any, ttl: Optional[int] = None):
+    def __init__(self, key: str, value: Any, ttl: Optional[float] = None):
         self.key = key
         self.value = value
         if ttl is not None:
