@@ -1,5 +1,6 @@
 from typing import Any, Optional
 from collections import OrderedDict
+from threading import RLock
 from app.core.v1.entry import Entry
 
 
@@ -14,6 +15,7 @@ class KVStore:
 
         self.capacity = capacity
         self._store: OrderedDict[str, Entry] = OrderedDict()
+        self._lock = RLock()
 
     def _remove_expired_entries(self) -> None:
         """
@@ -28,31 +30,34 @@ class KVStore:
             self._store.pop(key, None)
 
     def put(self, key: str, value: Any, ttl: Optional[float] = None) -> None:
-        # overwrite counts as access
-        if key in self._store:
-            self._store.pop(key)
+        with self._lock:
+            # overwrite counts as access
+            if key in self._store:
+                self._store.pop(key)
 
-        self._store[key] = Entry(key, value, ttl)
+            self._store[key] = Entry(key, value, ttl)
 
-        # first remove expired entries
-        self._remove_expired_entries()
+            # first remove expired entries
+            self._remove_expired_entries()
 
-        # then enforce capacity using LRU
-        while len(self._store) > self.capacity:
-            self._store.popitem(last=False)
+            # then enforce capacity using LRU
+            while len(self._store) > self.capacity:
+                self._store.popitem(last=False)
 
     def get(self, key: str) -> Optional[Any]:
-        entry = self._store.get(key)
-        if entry is None:
-            return None
+        with self._lock:
+            entry = self._store.get(key)
+            if entry is None:
+                return None
 
-        if entry.is_expired():
-            self._store.pop(key, None)
-            return None
+            if entry.is_expired():
+                self._store.pop(key, None)
+                return None
 
-        # mark as recently used
-        self._store.move_to_end(key, last=True)
-        return entry.value
+            # mark as recently used
+            self._store.move_to_end(key, last=True)
+            return entry.value
 
     def delete(self, key: str) -> None:
-        self._store.pop(key, None)
+        with self._lock:
+            self._store.pop(key, None)
