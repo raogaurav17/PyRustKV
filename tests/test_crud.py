@@ -1,10 +1,5 @@
 import pytest
-from app.core.v1.store import KVStore
-
-@pytest.fixture
-def store():
-    # small capacity to surface eviction bugs early
-    return KVStore(capacity=3)
+# Fixtures are defined in conftest.py and will be used automatically
 
 def test_put_and_get_basic(store):
     store.put("a", 1)
@@ -37,7 +32,8 @@ def test_delete_missing_key_is_noop(store):
     assert store.get("missing") is None
 
 
-def test_put_multiple_keys(store):
+def test_put_multiple_keys(store_crud):
+    store = store_crud
     store.put("a", 1)
     store.put("b", 2)
     store.put("c", 3)

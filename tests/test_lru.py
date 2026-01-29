@@ -1,10 +1,8 @@
 import time
-from app.core.v1.store import KVStore
+# Fixtures are defined in conftest.py and will be used automatically
 
 
-def test_lru_eviction_basic():
-    store = KVStore(capacity=2)
-
+def test_lru_eviction_basic(store):
     store.put("a", 1)
     store.put("b", 2)
     store.put("c", 3)  # should evict "a"
@@ -14,9 +12,7 @@ def test_lru_eviction_basic():
     assert store.get("c") == 3
 
 
-def test_lru_updates_on_get():
-    store = KVStore(capacity=2)
-
+def test_lru_updates_on_get(store):
     store.put("a", 1)
     store.put("b", 2)
 
@@ -30,9 +26,7 @@ def test_lru_updates_on_get():
     assert store.get("c") == 3
 
 
-def test_lru_updates_on_put_overwrite():
-    store = KVStore(capacity=2)
-
+def test_lru_updates_on_put_overwrite(store):
     store.put("a", 1)
     store.put("b", 2)
 
@@ -46,9 +40,7 @@ def test_lru_updates_on_put_overwrite():
     assert store.get("c") == 3
 
 
-def test_expired_entries_removed_before_lru_eviction():
-    store = KVStore(capacity=2)
-
+def test_expired_entries_removed_before_lru_eviction(store):
     store.put("a", 1, ttl=0.05)
     store.put("b", 2)
 
@@ -61,9 +53,7 @@ def test_expired_entries_removed_before_lru_eviction():
     assert store.get("c") == 3
 
 
-def test_multiple_lru_evictions():
-    store = KVStore(capacity=2)
-
+def test_multiple_lru_evictions(store):
     store.put("a", 1)
     store.put("b", 2)
     store.put("c", 3)
@@ -77,9 +67,7 @@ def test_multiple_lru_evictions():
     assert store.get("b") is None
 
 
-def test_get_does_not_revive_expired_entry():
-    store = KVStore(capacity=2)
-
+def test_get_does_not_revive_expired_entry(store):
     store.put("a", 1, ttl=0.05)
     time.sleep(0.1)
 

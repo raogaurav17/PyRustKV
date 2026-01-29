@@ -1,9 +1,8 @@
 import time
-from app.core.v1.store import KVStore
+# Fixtures are defined in conftest.py and will be used automatically
 
 
-def test_key_expires_after_ttl():
-    store = KVStore(capacity=3)
+def test_key_expires_after_ttl(store):
     store.put("a", 1, ttl=0.1)
 
     time.sleep(0.15)
@@ -11,15 +10,13 @@ def test_key_expires_after_ttl():
     assert store.get("a") is None
 
 
-def test_key_is_accessible_before_ttl_expires():
-    store = KVStore(capacity=3)
+def test_key_is_accessible_before_ttl_expires(store):
     store.put("a", 1, ttl=1.0)
 
     assert store.get("a") == 1
 
 
-def test_key_without_ttl_never_expires():
-    store = KVStore(capacity=3)
+def test_key_without_ttl_never_expires(store):
     store.put("a", 1)
 
     time.sleep(0.2)
@@ -27,8 +24,7 @@ def test_key_without_ttl_never_expires():
     assert store.get("a") == 1
 
 
-def test_expired_key_is_removed_on_access():
-    store = KVStore(capacity=3)
+def test_expired_key_is_removed_on_access(store):
     store.put("a", 1, ttl=0.05)
 
     time.sleep(0.1)
@@ -38,8 +34,7 @@ def test_expired_key_is_removed_on_access():
     assert store.get("a") is None
 
 
-def test_ttl_resets_on_overwrite():
-    store = KVStore(capacity=3)
+def test_ttl_resets_on_overwrite(store):
     store.put("a", 1, ttl=0.05)
 
     time.sleep(0.03)

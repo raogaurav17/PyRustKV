@@ -1,10 +1,10 @@
 import threading
 import time
-from app.core.v1.store import KVStore
+# Fixtures are defined in conftest.py and will be used automatically
 
 
-def test_concurrent_puts_do_not_crash():
-    store = KVStore(capacity=50)
+def test_concurrent_puts_do_not_crash(store_large):
+    store = store_large
     def worker(start):
         for i in range(start, start + 100):
             store.put(f"key-{i}", i)
@@ -25,11 +25,11 @@ def test_concurrent_puts_do_not_crash():
         if store.get(f"key-{i}") is not None:
             count += 1
 
-    assert count <= store.capacity
+    assert count <= store_large.capacity if hasattr(store_large, 'capacity') else count <= 50
 
 
-def test_concurrent_get_and_put():
-    store = KVStore(capacity=10)
+def test_concurrent_get_and_put(store_small):
+    store = store_small
     store.put("shared", 0)
 
     def writer():
@@ -53,8 +53,8 @@ def test_concurrent_get_and_put():
         t.join()
 
 
-def test_concurrent_deletes():
-    store = KVStore(capacity=10)
+def test_concurrent_deletes(store_small):
+    store = store_small
 
     for i in range(10):
         store.put(str(i), i)
@@ -75,8 +75,8 @@ def test_concurrent_deletes():
         assert store.get(str(i)) is None
 
 
-def test_concurrent_ttl_expiry_and_access():
-    store = KVStore(capacity=5)
+def test_concurrent_ttl_expiry_and_access(store_small):
+    store = store_small
     store.put("temp", 1, ttl=0.05)
 
     def reader():
