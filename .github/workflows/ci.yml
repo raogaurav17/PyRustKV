@@ -33,10 +33,7 @@ jobs:
           pip install maturin
 
       - name: Build Rust extension
-        run: |
-          cd rust_kv
-          maturin develop
-          cd ..
+        run: maturin develop
 
       - name: Run tests
         run: pytest -v
