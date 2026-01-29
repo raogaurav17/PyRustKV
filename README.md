@@ -75,7 +75,7 @@ PyRustKV is an intelligent hybrid key-value store that leverages **Rust's perfor
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.10+
 - Rust 1.70+ (for building the Rust extension)
 - pip or conda
 
