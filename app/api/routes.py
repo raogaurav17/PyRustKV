@@ -24,7 +24,7 @@ def get_key(key: str):
         raise HTTPException(status_code=404, detail="Key not found")
     return {"key": key, "value": value}
 
-@router.delete("/kv/{key}")
+@router.delete("/kv/delete/{key}")
 def delete_key(key: str):
     store = get_store()
     store.delete(key)
