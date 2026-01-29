@@ -1,21 +1,21 @@
 #![allow(unsafe_op_in_unsafe_fn)]
 
+use indexmap::IndexMap;
 use pyo3::prelude::*;
 use pyo3::types::PyAny;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
-use indexmap::IndexMap;
 
 #[derive(Clone)]
-struct Entry{
+struct Entry {
     value: Py<PyAny>,
     expires_at: Option<Instant>,
 }
 
-struct StoreInner{
+struct StoreInner {
     map: HashMap<String, Entry>,
-    lru : IndexMap<String, ()>,
+    lru: IndexMap<String, ()>,
     capacity: usize,
 }
 
@@ -46,10 +46,10 @@ impl KvStore {
 
         if store.map.contains_key(&key) {
             store.lru.shift_remove(&key);
-        } else if store.map.len() >= store.capacity {
-            if let Some((oldest_key, _)) = store.lru.shift_remove_index(0) {
-                store.map.remove(&oldest_key);
-            }
+        } else if store.map.len() >= store.capacity
+            && let Some((oldest_key, _)) = store.lru.shift_remove_index(0)
+        {
+            store.map.remove(&oldest_key);
         }
 
         store.map.insert(key.clone(), Entry { value, expires_at });
@@ -59,12 +59,12 @@ impl KvStore {
     fn get(&self, key: String) -> Option<Py<PyAny>> {
         let mut store = self.inner.lock().unwrap();
         if let Some(entry) = store.map.get(&key) {
-            if let Some(expiry) = entry.expires_at {
-                if Instant::now() >= expiry {
-                    store.map.remove(&key);
-                    store.lru.shift_remove(&key);
-                    return None;
-                }
+            if let Some(expiry) = entry.expires_at
+                && Instant::now() >= expiry
+            {
+                store.map.remove(&key);
+                store.lru.shift_remove(&key);
+                return None;
             }
             let value = entry.value.clone();
             store.lru.shift_remove(&key);
