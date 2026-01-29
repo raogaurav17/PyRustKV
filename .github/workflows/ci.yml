@@ -33,9 +33,10 @@ jobs:
           pip install maturin
 
       - name: Build Rust extension
+        working-directory: rust_kv
         run: |
           maturin build -i python --release
-          pip install target/wheels/rust_kv-*.whl
+          pip install target/wheels/*.whl
 
       - name: Run tests
         run: pytest -v
